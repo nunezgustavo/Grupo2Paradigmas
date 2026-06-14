@@ -1,4 +1,6 @@
-# Grupo 2 ¡¡Falta modificar el .md con respecto al archivo python!!
+# Grupo 2 — Documentación Técnica
+
+> Estado del documento: se actualizó con base en el archivo Python actual. Las partes ya implementadas en `proyecto_G02.py` se indican como completadas; las que aún no están terminadas se marcan como "falta completar".
 
 # Documentación Técnica — Proyecto Final
 ## Paradigmas de la Programación · FP-UNA · 2026
@@ -22,21 +24,23 @@
 
 ### ¿Qué hace el sistema?
 
-El sistema permite administrar una colección personal de plantas de interior
-desde la consola. El usuario puede:
+El sistema permite administrar una colección de especies en peligro desde la
+consola. El usuario puede:
 
-- Registrar nuevas plantas con sus datos de cuidado.
-- Consultar qué plantas requieren atención.
-- Filtrar por nivel de luz requerida.
-- Obtener estadísticas adaptadas al ambiente de la colección.
-- Ejecutar el módulo funcional para obtener resúmenes y listados ordenados.
+- Registrar especies con categoría válida. ✅ completado
+- Mostrar todas las especies registradas. ✅ completado
+- Buscar una especie por nombre. ✅ completado
+- Filtrar especies por categoría. ✅ completado
+- Marcar una especie como estudiada. ✅ completado
+- Ver estadísticas básicas de la colección. ✅ completado
+- Ejecutar el módulo funcional. falta completar ❌
 
 ### ¿Qué problema resuelve?
 
-Los aficionados a las plantas de interior suelen gestionar colecciones grandes
-sin ninguna herramienta. Este sistema centraliza el registro y facilita el
-mantenimiento al identificar rápidamente qué plantas están enfermas y cuáles
-son adecuadas para un ambiente particular (baño, oficina, dormitorio).
+La reserva natural necesita registrar y consultar especies con una categoría
+válida, sin perder información sobre qué especies ya fueron estudiadas.
+Este sistema centraliza el registro y facilita la revisión rápida de la
+colección. falta completar ❌
 
 ---
 
@@ -44,30 +48,26 @@ son adecuadas para un ambiente particular (baño, oficina, dormitorio).
 
 ### ¿Por qué esta jerarquía de clases?
 
-Se eligió una jerarquía de tres clases porque el dominio tiene dos niveles
-naturales de abstracción:
+La jerarquía implementada en `proyecto_G02.py` usa:
 
-1. **PlantaInterior** encapsula los datos y comportamiento de una planta
-   individual. Era natural que cada planta conociera su propio estado y
-   pudiera auto-diagnosticarse.
+1. `Especie` para representar cada especie individual. ✅ completado
+2. `EspecieEnPeligro` para gestionar la colección especializada. ✅ completado
+3. Validación de categoría mediante `categoria_valida()`. ✅ completado
 
-2. **ColeccionPlantas** centraliza la gestión de la colección. Se separó del
-   concepto de "planta individual" porque las operaciones de búsqueda y
-   estadística son responsabilidad del contenedor, no del elemento.
+La idea de diseño fue separar la entidad individual (`Especie`) de la
+colección (`EspecieEnPeligro`), porque las operaciones de búsqueda, filtrado
+estadísticas pertenecen a la colección, no a cada especie por separado.
 
-3. **ColeccionEspecializada** extiende la colección con el concepto de
-   *ambiente*. Se eligió herencia en lugar de composición porque
-   ColeccionEspecializada *es una* ColeccionPlantas más específica, no
-   *tiene una* — reutiliza todas sus operaciones base y solo amplía
-   `estadisticas()` con información del ambiente.
+Esta estructura permitió que la categoría se valide al momento de registrar
+cada especie, y que la colección mantenga el estado de todas las especies
+registradas. Las funciones auxiliares del módulo funcional aún están pendientes. falta completar ❌
 
 ### ¿Se consideraron alternativas?
 
-Sí. Una alternativa era modelar el ambiente como un atributo de
-`ColeccionPlantas` directamente, sin herencia. Eso hubiera funcionado para
-este tamaño de sistema, pero habría mezclado responsabilidades: la clase base
-conocería conceptos propios de una versión especializada. Con herencia, la
-clase base permanece genérica y reutilizable.
+Sí. Otra opción era guardar todo en listas o diccionarios sueltos, pero eso
+hubiera dificultado la validación y el mantenimiento. Con clases, cada especie
+conoce su propia categoría y estado de estudio, y la colección centraliza las
+operaciones sobre ese conjunto.
 
 ---
 
@@ -78,90 +78,95 @@ clase base permanece genérica y reutilizable.
 > ilustrar la estructura antes de que el diagrama esté terminado.
 
 ```
-┌────────────────────────────────┐
-│          <<clase>>             │
-│       PlantaInterior           │
-├────────────────────────────────┤
-│ + nombre_comun : str           │
-│ + nombre_cientifico : str      │
-│ + luz_requerida : str          │
-│ + frecuencia_riego_dias : int  │
-│ + tiene_flor : bool            │
-│ + esta_sana : bool             │
-├────────────────────────────────┤
-│ + diagnostico() : str          │
-│ + marcar_enferma() : None      │
-│ + recuperar() : None           │
-│ + __str__() : str              │
-│ + __repr__() : str             │
-└────────────────────────────────┘
+┌──────────────────────────────────────┐
+│             <<clase>>                  │
+│               Especie                  │
+├──────────────────────────────────────┤
+│ + nombre : str                         │
+│ + categoria : str                      │
+│ + estudiada : bool                     │
+├──────────────────────────────────────┤
+│ + categoria_valida() : bool            │
+│ + es_activa() : bool      falta completar ❌ │
+│ + resumen() : str         falta completar ❌ │
+│ + __str__() : str                      │
+│ + __repr__() : str                     │
+└──────────────────────────────────────┘
               ▲  1..*
               │  (composición)
-┌─────────────┴──────────────────┐
-│          <<clase>>             │
-│       ColeccionPlantas         │
-├────────────────────────────────┤
-│ + nombre : str                 │
-│ + plantas : list[PlantaInterior│
-├────────────────────────────────┤
-│ + agregar(planta) : None       │
-│ + buscar_por_nombre(s) : list  │
-│ + filtrar_por_luz(n) : list    │
-│ + estadisticas() : None        │
-└────────────────────────────────┘
-              △
-              │  (herencia)
-┌─────────────┴────────────────────┐
-│           <<clase>>              │
-│     ColeccionEspecializada       │
-├──────────────────────────────────┤
-│ + ambiente : str                 │
-├──────────────────────────────────┤
-│ + estadisticas() [override]      │
-│ + plantas_para_ambiente() : list │
-└──────────────────────────────────┘
+┌─────────────┴──────────────────────────┐
+│             <<clase>>                  │
+│        EspecieEnPeligro                │
+├──────────────────────────────────────┤
+│ + nombre : str                         │
+│ + especializacion : str                │
+│ + especies : dict                      │
+├──────────────────────────────────────┤
+│ + agregar_especie() : bool             │
+│ + mostrar_especies() : bool            │
+│ + buscar_especie(nombre) : bool        │
+│ + filtrar_por_categoria(cat) : bool   │
+│ + marcar_estudiada(nombre) : bool      │
+│ + estadisticas() : bool                │
+│ + ejecutar_modulo_funcional() : falta completar ❌ │
+└──────────────────────────────────────┘
 ```
 
 **Cómo leer el diagrama:**
-- `▲ 1..*` indica que `ColeccionPlantas` *contiene* una o más instancias de
-  `PlantaInterior` (composición).
-- `△` indica herencia: `ColeccionEspecializada` *es una* `ColeccionPlantas`.
-- `[override]` señala que `estadisticas()` sobreescribe el método del padre.
+- `▲ 1..*` indica que `EspecieEnPeligro` contiene varias instancias de
+  `Especie`.
+- La validación de categoría ocurre dentro de `Especie` y se usa al registrar
+  cada nueva especie.
 
 ---
 
 ## 4. Descripción de clases y funciones públicas
 
-### Clase `PlantaInterior`
+### Clase `Especie` ✅ completado
 
-Representa una planta de interior individual.
+Representa una especie individual dentro de la colección.
 
 | Elemento                          | Tipo / Retorno | Descripción                                               |
 |-----------------------------------|---------------|-----------------------------------------------------------|
-| `nombre_comun`                    | `str`         | Nombre coloquial (ej: "Potus", "Suculenta")               |
-| `nombre_cientifico`               | `str`         | Nombre científico (ej: "Epipremnum aureum")               |
-| `luz_requerida`                   | `str`         | `'alta'`, `'media'` o `'baja'`                            |
-| `frecuencia_riego_dias`           | `int`         | Días entre riegos                                         |
-| `tiene_flor`                      | `bool`        | Si produce flores                                         |
-| `esta_sana`                       | `bool`        | Estado actual de la planta                                |
-| `diagnostico()`                   | `str`         | Resumen del estado con datos de cuidado                   |
-| `marcar_enferma()`                | `None`        | Cambia `esta_sana` a `False`                              |
-| `recuperar()`                     | `None`        | Cambia `esta_sana` a `True`                               |
+| `nombre`                          | `str`         | Nombre de la especie                                      |
+| `categoria`                       | `str`         | Categoría de conservación (`en peligro`, `vulnerable`, `extinta`) |
+| `estudiada`                       | `bool`        | Indica si ya fue marcada como estudiada                   |
+| `categoria_valida()`              | `bool`        | Valida que la categoría ingresada sea correcta             |
+| `es_activa()`                     | `bool`        | falta completar ❌                                        |
+| `resumen()`                       | `str`         | falta completar ❌                                        |
+| `__lt__()` / `__eq__()`            | `bool`        | Comparación por nombre de especie                         |
 
-### Clase `ColeccionPlantas`
+### Clase `EspecieEnPeligro` ✅ completado
 
-Gestiona la colección completa.
+Gestiona la colección completa de especies en peligro.
 
 | Elemento                          | Tipo / Retorno         | Descripción                                       |
 |-----------------------------------|------------------------|---------------------------------------------------|
 | `nombre`                          | `str`                  | Nombre descriptivo de la colección                |
-| `plantas`                         | `list[PlantaInterior]` | Todas las plantas registradas                     |
-| `agregar(planta)`                 | `None`                 | Agrega una planta; valida tipo antes de insertar  |
-| `buscar_por_nombre(nombre)`       | `list[PlantaInterior]` | Búsqueda parcial, case-insensitive                |
-| `filtrar_por_luz(nivel_luz)`      | `list[PlantaInterior]` | Filtra por nivel de luz exacto                    |
-| `estadisticas()`                  | `None`                 | Imprime totales, sanas, flores, riego promedio    |
+| `especializacion`                 | `str`                  | Especialización o contexto de la colección        |
+| `especies`                        | `dict`                 | Diccionario con las especies registradas          |
+| `agregar_especie()`               | `bool`                 | Agrega una especie validando la categoría         |
+| `mostrar_especies()`              | `bool`                 | Muestra todas las especies registradas             |
+| `buscar_especie(nombre)`          | `bool`                 | Busca una especie por nombre                      |
+| `filtrar_por_categoria(cat)`      | `bool`                 | Filtra por categoría usando `filter()`             |
+| `marcar_estudiada(nombre)`        | `bool`                 | Marca una especie como estudiada                   |
+| `estadisticas()`                  | `bool`                 | Muestra total y especies estudiadas                |
+| `ejecutar_modulo_funcional()`     | `None`                 | falta completar ❌                                  |
 
-### Clase `ColeccionEspecializada` *(hereda de `ColeccionPlantas`)*
+### Funciones del módulo funcional
+
+- `item_activos(coleccion)`: falta completar ❌
+- `resumen_coleccion(coleccion)`: falta completar ❌
+- `items_ordenados(coleccion)`: falta completar ❌
+
+### Métodos pendientes en la clase `Especie`
+
+- `es_activa()`: falta completar ❌
+- `resumen()`: falta completar ❌
+
+### Métodos pendientes en la clase `EspecieEnPeligro`
+
+- `ejecutar_modulo_funcional()`: falta completar ❌
 
 | Elemento                          | Tipo / Retorno         | Descripción                                                 |
 |-----------------------------------|------------------------|-------------------------------------------------------------|
@@ -171,11 +176,11 @@ Gestiona la colección completa.
 
 ### Módulo funcional
 
-| Función                                    | Retorno         | Herramienta   | Descripción                                      |
-|--------------------------------------------|-----------------|---------------|--------------------------------------------------|
-| `plantas_sanas(coleccion)`                 | `list[str]`     | filter + map  | Nombres de plantas en estado sano                |
-| `resumen_coleccion(coleccion)`             | `list[str]`     | map + lambda  | Una línea de resumen por planta                  |
-| `plantas_ordenadas(coleccion, criterio)`   | `list[PlantaInterior]` | sorted + lambda | Lista ordenada por el atributo indicado   |
+| Función                           | Retorno         | Herramienta   | Descripción                                      |
+|-----------------------------------|-----------------|---------------|--------------------------------------------------|
+| `item_activos(coleccion)`         | `list`          | filter + map  | falta completar ❌                                |
+| `resumen_coleccion(coleccion)`    | `list[str]`     | map + lambda  | falta completar ❌                                |
+| `items_ordenados(coleccion)`      | `list`          | sorted + lambda | falta completar ❌                              |
 
 ---
 
@@ -189,32 +194,36 @@ Gestiona la colección completa.
 ### Ejecución
 
 ```bash
-python proyecto_G00_ejemplo.py
+python proyecto_G02.py
 ```
 
 ### Secuencia mínima para probar el sistema
 
+Opciones actualmente disponibles en `proyecto_G02.py`:
+
+1. Agregar especie ✅ completado
+2. Mostrar especies ✅ completado
+3. Buscar especie ✅ completado
+4. Filtrar por categoría ✅ completado
+5. Marcar especie como estudiada ✅ completado
+6. Ver estadísticas ✅ completado
+7. Salir ✅ completado
+
+La parte del módulo funcional aún está pendiente. falta completar ❌
+
 ```
-Nombre de la colección: Mi Jardín Interior
-Ambiente: Oficina
+Nombre de la colección: Colección de Especies en Peligro
+Especialización: Especies en Peligro
 
-[Opción 1] Agregar planta:
-  Nombre común: Potus
-  Nombre científico: Epipremnum aureum
-  Luz requerida: baja
-  Frecuencia de riego (días): 7
-  ¿Produce flores? (s/n): n
+[Opción 1] Agregar especie:
+  Nombre: Lobo
+  Categoría: en peligro
 
-[Opción 1] Agregar planta:
-  Nombre común: Orquídea
-  Nombre científico: Phalaenopsis amabilis
-  Luz requerida: media
-  Frecuencia de riego (días): 5
-  ¿Produce flores? (s/n): s
+[Opción 4] Filtrar por categoría:
+  Categoría: en peligro
 
 [Opción 6] Ver estadísticas
-[Opción 7] Módulo funcional → c → frecuencia_riego_dias
-[Opción 9] Salir
+[Opción 7] Salir
 ```
 
 ---
@@ -223,24 +232,22 @@ Ambiente: Oficina
 
 *(Esta sección puede referenciar los comentarios al final del archivo .py)*
 
-La reflexión completa se encuentra en el bloque de comentarios al final de
-`proyecto_G00_ejemplo.py` (líneas ~220 en adelante). A continuación un
-resumen:
+La reflexión completa se encuentra en los comentarios del archivo actual
+`proyecto_G02.py`. A continuación un resumen adaptado al dominio real del
+proyecto:
 
-**TPI 1 vs Proyecto Final — `agregar`:**
-La diferencia central es que en TPI 1 el estado vivía fuera de las funciones
-(lista global). En el Proyecto Final, `self.plantas` pertenece al objeto, y
-la validación del tipo está encapsulada en el método. Esto eliminó una clase
-entera de errores posibles.
+**Comparación con el enfoque anterior:**
+La diferencia central es que ahora el estado de la colección vive dentro de
+`self.especies`, y la validación de categoría se realiza dentro de la clase.
+Eso hace que el programa sea más ordenado y evita errores de ingreso.
 
 **Decisión de diseño más difícil:**
-Modelar `plantas_para_ambiente()` sin crear una subclase por cada ambiente.
-La solución (dict de lambdas) resultó más extensible y menos verbosa.
+Validar la categoría hasta recibir una opción correcta, sin permitir avanzar
+con una entrada inválida. Esa decisión mantiene la lógica consistente.
 
 **Módulo funcional sobre objetos:**
-Operar con `p.esta_sana` en lugar de `planta["leido"]` eliminó los KeyError
-posibles y hizo el código más expresivo. Ver `plantas_sanas()` vs
-`filtrar_por_genero()` del TPI 1.
+Trabajar con `especie.categoria` y `especie.estudiada` hace que el código
+sea legible y fácil de mantener, en lugar de depender de estructuras sueltas.
 
 ---
 
