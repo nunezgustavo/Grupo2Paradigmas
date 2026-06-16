@@ -28,12 +28,10 @@ class Especie:
             self.categoria = input("Ingrese la categoría de la especie válida (En Peligro - Vulnerable - Extinta): ")
     
     def es_activa(self):
-        # Retorna True si la especie cumple la condición principal del dominio (por ejemplo, si está en peligro), False en caso contrario
-        pass
+        return self.categoria.lower() == "en peligro"
 
     def resumen(self):
-        # Retorna un string que resume la información de la especie
-        pass
+        return f"{self.nombre} | Categoría: {self.categoria} | Estudiada: {'Sí' if self.estudiada else 'No'}"
 
     def __lt__(self, other):
         # Define el criterio de ordenamiento por nombre de la especie
