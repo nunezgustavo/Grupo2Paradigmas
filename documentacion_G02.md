@@ -13,7 +13,7 @@
 |------------------|--------------------------------------------------------|
 | **Dominio**      | Reserva Natural    |
 | **Grupo**        | G02     |
-| **Integrantes**  | Ñunez Gustavo · Maidana Jose · Portillo Elias |
+| **Integrantes**  | Ñunez Gustavo · Maidana Josias · Portillo Elias |
 | **Fecha**        | Mayo 2026                                              |
 | **Docente**      | Prof. Lic. Gustavo Galeano                             |
 | **Materia**      | Paradigmas de la Programación (Código 4.2)             |
