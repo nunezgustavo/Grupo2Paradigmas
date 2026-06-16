@@ -1,7 +1,3 @@
-# Grupo 2 — Documentación Técnica
-
-> Estado del documento: se actualizó con base en el archivo Python actual. Las partes ya implementadas en `proyecto_G02.py` se indican como completadas; las que aún no están terminadas se marcan como "falta completar".
-
 # Documentación Técnica — Proyecto Final
 ## Paradigmas de la Programación · FP-UNA · 2026
 
@@ -9,14 +5,14 @@
 
 ## Carátula
 
-| Campo            | Valor                                                  |
-|------------------|--------------------------------------------------------|
-| **Dominio**      | Reserva Natural    |
-| **Grupo**        | G02     |
-| **Integrantes**  | Ñunez Gustavo · Maidana Josias · Portillo Elias |
-| **Fecha**        | Mayo 2026                                              |
-| **Docente**      | Prof. Lic. Gustavo Galeano                             |
-| **Materia**      | Paradigmas de la Programación (Código 4.2)             |
+| Campo           | Valor                                                   |
+|-----------------|---------------------------------------------------------|
+| **Dominio**     | Reserva Natural                                         |
+| **Grupo**       | G02                                                     |
+| **Integrantes** | Ñunez Gustavo · Maidana Josias · Portillo Elias         |
+| **Fecha**       | Junio 2026                                              |
+| **Docente**     | Prof. Lic. Gustavo Galeano                              |
+| **Materia**     | Paradigmas de la Programación (Código 4.2)              |
 
 ---
 
@@ -24,23 +20,23 @@
 
 ### ¿Qué hace el sistema?
 
-El sistema permite administrar una colección de especies en peligro desde la
-consola. El usuario puede:
+El sistema permite administrar una colección de especies de una reserva natural
+desde la consola. El usuario puede:
 
-- Registrar especies con categoría válida. ✅ completado
-- Mostrar todas las especies registradas. ✅ completado
-- Buscar una especie por nombre. ✅ completado
-- Filtrar especies por categoría. ✅ completado
-- Marcar una especie como estudiada. ✅ completado
-- Ver estadísticas básicas de la colección. ✅ completado
-- Ejecutar el módulo funcional. falta completar ❌
+- Registrar nuevas especies con sus datos de conservación.
+- Consultar qué especies están en estado crítico.
+- Filtrar por categoría de conservación.
+- Marcar especies como estudiadas.
+- Obtener estadísticas de la reserva.
+- Generar un plan de conservación para las especies en peligro.
+- Ejecutar el módulo funcional para obtener resúmenes y listados ordenados.
 
 ### ¿Qué problema resuelve?
 
-La reserva natural necesita registrar y consultar especies con una categoría
-válida, sin perder información sobre qué especies ya fueron estudiadas.
-Este sistema centraliza el registro y facilita la revisión rápida de la
-colección. falta completar ❌
+Las reservas naturales gestionan colecciones de especies sin herramientas
+centralizadas. Este sistema permite registrar y consultar el estado de
+conservación de cada especie, identificar rápidamente cuáles están en peligro
+crítico y cuáles aún no fueron estudiadas, y generar planes de acción concretos.
 
 ---
 
@@ -48,139 +44,133 @@ colección. falta completar ❌
 
 ### ¿Por qué esta jerarquía de clases?
 
-La jerarquía implementada en `proyecto_G02.py` usa:
+Se eligió una jerarquía de tres clases porque el dominio tiene dos niveles
+naturales de abstracción:
 
-1. `Especie` para representar cada especie individual. ✅ completado
-2. `EspecieEnPeligro` para gestionar la colección especializada. ✅ completado
-3. Validación de categoría mediante `categoria_valida()`. ✅ completado
+1. **Especie** encapsula los datos y comportamiento de una especie individual.
+   Es natural que cada especie conozca su propia categoría y pueda indicar si
+   está activa (en peligro crítico).
 
-La idea de diseño fue separar la entidad individual (`Especie`) de la
-colección (`EspecieEnPeligro`), porque las operaciones de búsqueda, filtrado
-estadísticas pertenecen a la colección, no a cada especie por separado.
+2. **Coleccion** centraliza la gestión del conjunto de especies. Se separó del
+   concepto de "especie individual" porque las operaciones de búsqueda, filtrado
+   y estadísticas son responsabilidad del contenedor, no de cada elemento.
 
-Esta estructura permitió que la categoría se valide al momento de registrar
-cada especie, y que la colección mantenga el estado de todas las especies
-registradas. Las funciones auxiliares del módulo funcional aún están pendientes. falta completar ❌
+3. **EspecieEnPeligro** extiende la colección con el concepto de
+   *población estimada* de la reserva. Se eligió herencia en lugar de
+   composición porque `EspecieEnPeligro` *es una* `Coleccion` más específica —
+   reutiliza todas sus operaciones base y solo amplía `estadisticas()` con datos
+   de la reserva y agrega `plan_conservacion()`.
 
 ### ¿Se consideraron alternativas?
 
-Sí. Otra opción era guardar todo en listas o diccionarios sueltos, pero eso
-hubiera dificultado la validación y el mantenimiento. Con clases, cada especie
-conoce su propia categoría y estado de estudio, y la colección centraliza las
-operaciones sobre ese conjunto.
+Sí. La primera versión del código ponía toda la lógica directamente en
+`EspecieEnPeligro` sin una clase `Coleccion` intermedia. Eso mezclaba
+responsabilidades: la clase especializada conocía conceptos que debería
+delegar. Con la jerarquía final, la clase base permanece genérica y
+reutilizable para cualquier tipo de reserva.
 
 ---
 
 ## 3. Diagrama UML de clases
 
-> **Instrucción:** Reemplazar este bloque con una imagen del diagrama generado
-> en draw.io u otra herramienta. El texto ASCII a continuación es solo para
-> ilustrar la estructura antes de que el diagrama esté terminado.
-
 ```
-┌──────────────────────────────────────┐
-│             <<clase>>                  │
-│               Especie                  │
-├──────────────────────────────────────┤
-│ + nombre : str                         │
-│ + categoria : str                      │
-│ + estudiada : bool                     │
-├──────────────────────────────────────┤
-│ + categoria_valida() : bool            │
-│ + es_activa() : bool      falta completar ❌ │
-│ + resumen() : str         falta completar ❌ │
-│ + __str__() : str                      │
-│ + __repr__() : str                     │
-└──────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│             <<clase>>               │
+│              Especie                │
+├─────────────────────────────────────┤
+│ + nombre : str                      │
+│ + nombre_cientifico : str           │
+│ + habitat : str                     │
+│ + categoria : str                   │
+│ + estudiada : bool                  │
+├─────────────────────────────────────┤
+│ + es_activa() : bool                │
+│ + resumen() : str                   │
+│ + marcar_estudiada() : None         │
+│ + __str__() : str                   │
+│ + __repr__() : str                  │
+│ + __lt__() : bool                   │
+│ + __eq__() : bool                   │
+└─────────────────────────────────────┘
               ▲  1..*
               │  (composición)
-┌─────────────┴──────────────────────────┐
-│             <<clase>>                  │
-│        EspecieEnPeligro                │
-├──────────────────────────────────────┤
-│ + nombre : str                         │
-│ + especializacion : str                │
-│ + especies : dict                      │
-├──────────────────────────────────────┤
-│ + agregar_especie() : bool             │
-│ + mostrar_especies() : bool            │
-│ + buscar_especie(nombre) : bool        │
-│ + filtrar_por_categoria(cat) : bool   │
-│ + marcar_estudiada(nombre) : bool      │
-│ + estadisticas() : bool                │
-│ + ejecutar_modulo_funcional() : falta completar ❌ │
-└──────────────────────────────────────┘
+┌─────────────┴───────────────────────┐
+│             <<clase>>               │
+│             Coleccion               │
+├─────────────────────────────────────┤
+│ + nombre : str                      │
+│ + especies : list[Especie]          │
+├─────────────────────────────────────┤
+│ + agregar(especie) : None           │
+│ + buscar_por_nombre(n) : list       │
+│ + filtrar_por_categoria(c) : list   │
+│ + estadisticas() : None             │
+└─────────────────────────────────────┘
+              △
+              │  (herencia)
+┌─────────────┴───────────────────────┐
+│             <<clase>>               │
+│         EspecieEnPeligro            │
+├─────────────────────────────────────┤
+│ + poblacion_estimada : int          │
+├─────────────────────────────────────┤
+│ + estadisticas() [override]         │
+│ + plan_conservacion() : None        │
+└─────────────────────────────────────┘
 ```
 
 **Cómo leer el diagrama:**
-- `▲ 1..*` indica que `EspecieEnPeligro` contiene varias instancias de
-  `Especie`.
-- La validación de categoría ocurre dentro de `Especie` y se usa al registrar
-  cada nueva especie.
+- `▲ 1..*` indica que `Coleccion` *contiene* una o más instancias de `Especie` (composición).
+- `△` indica herencia: `EspecieEnPeligro` *es una* `Coleccion`.
+- `[override]` señala que `estadisticas()` sobreescribe el método del padre llamando a `super()`.
 
 ---
 
 ## 4. Descripción de clases y funciones públicas
 
-### Clase `Especie` ✅ completado
+### Clase `Especie`
 
-Representa una especie individual dentro de la colección.
+Representa una especie individual dentro de la reserva natural.
 
-| Elemento                          | Tipo / Retorno | Descripción                                               |
-|-----------------------------------|---------------|-----------------------------------------------------------|
-| `nombre`                          | `str`         | Nombre de la especie                                      |
-| `categoria`                       | `str`         | Categoría de conservación (`en peligro`, `vulnerable`, `extinta`) |
-| `estudiada`                       | `bool`        | Indica si ya fue marcada como estudiada                   |
-| `categoria_valida()`              | `bool`        | Valida que la categoría ingresada sea correcta             |
-| `es_activa()`                     | `bool`        | falta completar ❌                                        |
-| `resumen()`                       | `str`         | falta completar ❌                                        |
-| `__lt__()` / `__eq__()`            | `bool`        | Comparación por nombre de especie                         |
+| Elemento                | Tipo / Retorno | Descripción                                                    |
+|-------------------------|---------------|----------------------------------------------------------------|
+| `nombre`                | `str`         | Nombre común de la especie (ej: "Jaguar")                      |
+| `nombre_cientifico`     | `str`         | Nombre científico (ej: "Panthera onca")                        |
+| `habitat`               | `str`         | Hábitat donde vive la especie                                  |
+| `categoria`             | `str`         | Estado de conservación: `en peligro`, `vulnerable`, `extinta`  |
+| `estudiada`             | `bool`        | Indica si la especie ya fue relevada por investigadores        |
+| `es_activa()`           | `bool`        | Retorna `True` si la categoría es `"en peligro"`               |
+| `resumen()`             | `str`         | Línea resumida con nombre, categoría y estado de estudio       |
+| `marcar_estudiada()`    | `None`        | Cambia `estudiada` a `True`                                    |
 
-### Clase `EspecieEnPeligro` ✅ completado
+### Clase `Coleccion`
 
-Gestiona la colección completa de especies en peligro.
+Gestiona la colección general de especies de la reserva.
 
-| Elemento                          | Tipo / Retorno         | Descripción                                       |
-|-----------------------------------|------------------------|---------------------------------------------------|
-| `nombre`                          | `str`                  | Nombre descriptivo de la colección                |
-| `especializacion`                 | `str`                  | Especialización o contexto de la colección        |
-| `especies`                        | `dict`                 | Diccionario con las especies registradas          |
-| `agregar_especie()`               | `bool`                 | Agrega una especie validando la categoría         |
-| `mostrar_especies()`              | `bool`                 | Muestra todas las especies registradas             |
-| `buscar_especie(nombre)`          | `bool`                 | Busca una especie por nombre                      |
-| `filtrar_por_categoria(cat)`      | `bool`                 | Filtra por categoría usando `filter()`             |
-| `marcar_estudiada(nombre)`        | `bool`                 | Marca una especie como estudiada                   |
-| `estadisticas()`                  | `bool`                 | Muestra total y especies estudiadas                |
-| `ejecutar_modulo_funcional()`     | `None`                 | falta completar ❌                                  |
+| Elemento                        | Tipo / Retorno   | Descripción                                        |
+|---------------------------------|------------------|----------------------------------------------------|
+| `nombre`                        | `str`            | Nombre descriptivo de la colección                 |
+| `especies`                      | `list[Especie]`  | Lista de todas las especies registradas            |
+| `agregar(especie)`              | `None`           | Agrega una especie; valida el tipo antes de insertar |
+| `buscar_por_nombre(nombre)`     | `list[Especie]`  | Búsqueda parcial, case-insensitive                 |
+| `filtrar_por_categoria(cat)`    | `list[Especie]`  | Filtra por categoría exacta usando `filter()`      |
+| `estadisticas()`                | `None`           | Imprime totales, estudiadas, distribución por categoría |
 
-### Funciones del módulo funcional
+### Clase `EspecieEnPeligro` *(hereda de `Coleccion`)*
 
-- `item_activos(coleccion)`: falta completar ❌
-- `resumen_coleccion(coleccion)`: falta completar ❌
-- `items_ordenados(coleccion)`: falta completar ❌
-
-### Métodos pendientes en la clase `Especie`
-
-- `es_activa()`: falta completar ❌
-- `resumen()`: falta completar ❌
-
-### Métodos pendientes en la clase `EspecieEnPeligro`
-
-- `ejecutar_modulo_funcional()`: falta completar ❌
-
-| Elemento                          | Tipo / Retorno         | Descripción                                                 |
-|-----------------------------------|------------------------|-------------------------------------------------------------|
-| `ambiente`                        | `str`                  | Ambiente de la colección (Baño, Oficina, etc.)              |
-| `estadisticas()`                  | `None`                 | Llama a `super().estadisticas()` y agrega estadísticas del ambiente |
-| `plantas_para_ambiente()`         | `list[PlantaInterior]` | Filtra plantas adecuadas según el ambiente configurado      |
+| Elemento                  | Tipo / Retorno | Descripción                                                          |
+|---------------------------|---------------|----------------------------------------------------------------------|
+| `poblacion_estimada`      | `int`         | Población total estimada en la reserva                               |
+| `estadisticas()`          | `None`        | Llama a `super().estadisticas()` y agrega datos de la especialización |
+| `plan_conservacion()`     | `None`        | Lista las especies en peligro crítico con su estado de estudio       |
 
 ### Módulo funcional
 
-| Función                           | Retorno         | Herramienta   | Descripción                                      |
-|-----------------------------------|-----------------|---------------|--------------------------------------------------|
-| `item_activos(coleccion)`         | `list`          | filter + map  | falta completar ❌                                |
-| `resumen_coleccion(coleccion)`    | `list[str]`     | map + lambda  | falta completar ❌                                |
-| `items_ordenados(coleccion)`      | `list`          | sorted + lambda | falta completar ❌                              |
+| Función                              | Retorno         | Herramienta      | Descripción                                      |
+|--------------------------------------|-----------------|------------------|--------------------------------------------------|
+| `items_activos(coleccion)`           | `list[str]`     | filter + map     | Nombres de especies en categoría `"en peligro"`  |
+| `resumen_coleccion(coleccion)`       | `list[str]`     | map + lambda     | Una línea de resumen por especie                 |
+| `items_ordenados(coleccion, criterio)` | `list[Especie]` | sorted + lambda | Lista ordenada por el atributo indicado          |
 
 ---
 
@@ -188,7 +178,7 @@ Gestiona la colección completa de especies en peligro.
 
 ### Requisitos
 
-- Python 3.8 o superior
+- Python 3.10 o superior (por el uso de `match`)
 - No requiere librerías externas
 
 ### Ejecución
@@ -199,55 +189,52 @@ python proyecto_G02.py
 
 ### Secuencia mínima para probar el sistema
 
-Opciones actualmente disponibles en `proyecto_G02.py`:
-
-1. Agregar especie ✅ completado
-2. Mostrar especies ✅ completado
-3. Buscar especie ✅ completado
-4. Filtrar por categoría ✅ completado
-5. Marcar especie como estudiada ✅ completado
-6. Ver estadísticas ✅ completado
-7. Salir ✅ completado
-
-La parte del módulo funcional aún está pendiente. falta completar ❌
-
 ```
-Nombre de la colección: Colección de Especies en Peligro
-Especialización: Especies en Peligro
+Nombre de la colección: Reserva Pantanal
+Población estimada de la reserva: 1500
 
 [Opción 1] Agregar especie:
-  Nombre: Lobo
+  Nombre común: Jaguar
+  Nombre científico: Panthera onca
+  Hábitat: Selva tropical
   Categoría: en peligro
 
-[Opción 4] Filtrar por categoría:
-  Categoría: en peligro
+[Opción 1] Agregar especie:
+  Nombre común: Tapir
+  Nombre científico: Tapirus terrestris
+  Hábitat: Bosque húmedo
+  Categoría: vulnerable
 
+[Opción 5] Marcar como estudiada: Jaguar
 [Opción 6] Ver estadísticas
-[Opción 7] Salir
+[Opción 7] Plan de conservación
+[Opción 8] Módulo funcional → a → b → c → nombre
+[Opción 9] Salir
 ```
 
 ---
 
 ## 6. Reflexión comparativa
 
-*(Esta sección puede referenciar los comentarios al final del archivo .py)*
+*(La reflexión completa con referencias a líneas exactas se encuentra en los comentarios al final de `proyecto_G02.py`)*
 
-La reflexión completa se encuentra en los comentarios del archivo actual
-`proyecto_G02.py`. A continuación un resumen adaptado al dominio real del
-proyecto:
-
-**Comparación con el enfoque anterior:**
-La diferencia central es que ahora el estado de la colección vive dentro de
-`self.especies`, y la validación de categoría se realiza dentro de la clase.
-Eso hace que el programa sea más ordenado y evita errores de ingreso.
+**TPI 1 vs Proyecto Final — `agregar()`:**
+En TPI 1 el estado vivía en listas globales externas a las funciones. En el
+Proyecto Final, `self.especies` pertenece al objeto `Coleccion`, y la
+validación de tipo está encapsulada en el método `agregar()`. Esto eliminó una
+clase entera de errores posibles: ya no es posible insertar un dato incorrecto
+desde afuera.
 
 **Decisión de diseño más difícil:**
-Validar la categoría hasta recibir una opción correcta, sin permitir avanzar
-con una entrada inválida. Esa decisión mantiene la lógica consistente.
+Separar `Coleccion` de `EspecieEnPeligro`. La versión inicial ponía todo en
+una sola clase. La solución con herencia resultó más limpia: la clase base
+quedó genérica y la subclase solo agrega lo propio de su especialización
+(`poblacion_estimada` y `plan_conservacion()`).
 
 **Módulo funcional sobre objetos:**
-Trabajar con `especie.categoria` y `especie.estudiada` hace que el código
-sea legible y fácil de mantener, en lugar de depender de estructuras sueltas.
+Operar con `e.es_activa()` en lugar de `especie["categoria"] == "en peligro"`
+eliminó los posibles `KeyError` y hizo el código más expresivo. Ver
+`items_activos()` vs el filtrado manual de TPI 1.
 
 ---
 
