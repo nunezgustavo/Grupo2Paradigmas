@@ -1,203 +1,299 @@
-# Dominio - Reserva Natural
-"""
-Vamos a comentar primero lo que hacemos para poder descricir bien en el readme lo que hicimos
-"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Proyecto Final - Paradigmas de la Programación
+# Grupo 02 - Dominio: Reserva Natural
+# FP-UNA · 2026
 
-# Modulo OO
-# Entidad Base
-class Especie: 
+# ==============================================================
+# MÓDULO OO
+# ==============================================================
+
+class Especie:
+    """EntidadBase: representa una especie registrada en la reserva natural."""
+
     categorias_validas = ["en peligro", "vulnerable", "extinta"]
 
-    def __init__(self, nombre, categoria): 
+    def __init__(self, nombre, nombre_cientifico, habitat, categoria, estudiada=False):
         self.nombre = nombre
-        self.categoria = categoria # En Peligro - Vulnerable - Extinta
-        self.estudiada = False
-    
-    # Minimo de 5 métodos
-    def __str__(self): 
-        return f"Especie: {self.nombre} - Categoría: {self.categoria}"
+        self.nombre_cientifico = nombre_cientifico
+        self.habitat = habitat
+        self.categoria = categoria.lower().strip()
+        self.estudiada = estudiada
 
-    def __repr__(self): 
+    def __str__(self):
+        return (f"{self.nombre} ({self.nombre_cientifico}) | "
+                f"Hábitat: {self.habitat} | Categoría: {self.categoria} | "
+                f"Estudiada: {'Sí' if self.estudiada else 'No'}")
+
+    def __repr__(self):
         return self.__str__()
 
-    def categoria_valida(self):
-        while True:
-            if self.categoria.lower() in self.categorias_validas:
-                return True
-            print("Categoría no válida.")
-            self.categoria = input("Ingrese la categoría de la especie válida (En Peligro - Vulnerable - Extinta): ")
-    
+    def __lt__(self, other):
+        return self.nombre < other.nombre
+
+    def __eq__(self, other):
+        return self.nombre == other.nombre
+
     def es_activa(self):
-        return self.categoria.lower() == "en peligro"
+        """Retorna True si la especie está en la categoría de mayor riesgo."""
+        return self.categoria == "en peligro"
 
     def resumen(self):
         return f"{self.nombre} | Categoría: {self.categoria} | Estudiada: {'Sí' if self.estudiada else 'No'}"
 
-    def __lt__(self, other):
-        # Define el criterio de ordenamiento por nombre de la especie
-        return self.nombre < other.nombre
-    
-    def __eq__(self, other):
-        # Define la igualdad entre especies por su nombre
-        return self.nombre == other.nombre
-    
+    def marcar_estudiada(self):
+        self.estudiada = True
 
-# SubClase Especializada
-class EspecieEnPeligro(Especie):
-    def __init__(self, nombre, especializacion): 
-        # super().__init__(nombre, categoria)
+
+class Coleccion:
+    """Gestiona la colección general de especies de la reserva."""
+
+    def __init__(self, nombre):
         self.nombre = nombre
-        self.especializacion = especializacion
-        self.especies = {}
+        self.especies = []  # list[Especie]
 
-    def __str__(self): 
-        return "Colección: " + self.nombre + " - Especialización: " + self.especializacion
+    def agregar(self, especie):
+        if not isinstance(especie, Especie):
+            print("Error: solo se pueden agregar instancias de Especie.")
+            return
+        self.especies.append(especie)
+        print(f"Especie '{especie.nombre}' agregada correctamente.")
 
-    def __repr__(self): 
-        return self.__str__()
-    
-    # Agregar item
-    def agregar_especie(self): 
-        # Agrega una especie de la clase Especie a la colección especializada
-        nombre = input("Ingrese el nombre de la especie: ")
-        categoria = input("Ingrese la categoría de la especie (En Peligro - Vulnerable - Extinta): ")
-        especie = Especie(nombre, categoria)
-        especie.categoria_valida()
-        self.especies[nombre] = especie
-        print("Especie agregada correctamente.")
-        return True
-    
-    # Mostrar todos los ítems
-    def mostrar_especies(self): 
-        # Muestra todas las especies en la colección especializada
-        for especie in self.especies.values():
-            print(especie)
-        return True
+    def buscar_por_nombre(self, nombre):
+        """Búsqueda parcial, case-insensitive."""
+        return [e for e in self.especies if nombre.lower() in e.nombre.lower()]
 
-    # Buscar por atributo principal
-    def buscar_especie(self, nombre): 
-        # Busca una especie por su nombre y retorna la instancia o None si no se encuentra
-        especie = self.especies.get(nombre)
-        if especie:
-            print(especie)
-            return True
-        else:
-            print("Especie no encontrada.")
-            return True
+    def filtrar_por_categoria(self, categoria):
+        return list(filter(lambda e: e.categoria == categoria.lower().strip(), self.especies))
 
-    # Filtar por categoría
-    def filtar_por_categoria(self, categoria): 
-        # Retorna una lista de especies que pertenecen a una categoría específica usando filter() y lambda
-        categoria = categoria.lower().strip()
-        while categoria not in Especie.categorias_validas:
-            print("Categoría no válida. Opciones válidas: " + ", ".join(Especie.categorias_validas))
-            categoria = input("Ingrese la categoría a filtrar (En Peligro - Vulnerable - Extinta): ").lower().strip()
-
-        especies_filtadas = list(filter(lambda especie: especie.categoria.lower() == categoria, self.especies.values()))
-        if especies_filtadas:
-            print("Especies encontradas en la categoría '" + categoria + "':")
-            for especie in especies_filtadas:
-                print(f"- {especie.nombre} | Categoría: {especie.categoria} | Estudiada: {'Sí' if especie.estudiada else 'No'}")
-        else:
-            print("No se encontraron especies en la categoría especificada.")
-        return True
-
-    # Marcar ítem como procesado / activo / visitado (según dominio)
-    def marcar_estudiada(self, nombre): 
-        # Marca una especie como estudiada por su nombre, actualizando el atributo correspondiente
-        especie = self.especies.get(nombre)
-        if especie is None:
-            print("No se encontró la especie para marcar.")
-        else:
-            especie.estudiada = True
-            print(f"La especie '{nombre}' fue marcada como estudiada.")
-        return True
-
-    # Ver estadísticas
-    def estadisticas(self): 
-        # Retorna un resumen estadístico de la colección especializada, como el número total de especies, cuántas están estudiadas, etc.
+    def estadisticas(self):
         total = len(self.especies)
-        estudiadas = sum(1 for especie in self.especies.values() if especie.estudiada)
+        estudiadas = sum(1 for e in self.especies if e.estudiada)
+        en_peligro = sum(1 for e in self.especies if e.categoria == "en peligro")
+        vulnerables = sum(1 for e in self.especies if e.categoria == "vulnerable")
+        extintas = sum(1 for e in self.especies if e.categoria == "extinta")
+        print(f"\n--- ESTADÍSTICAS ---")
+        print(f"Colección: {self.nombre}")
         print(f"Total de especies: {total}")
-        print(f"Especies estudiadas: {estudiadas}")
-        return True
+        print(f"Estudiadas: {estudiadas} | Sin estudiar: {total - estudiadas}")
+        print(f"En peligro: {en_peligro} | Vulnerables: {vulnerables} | Extintas: {extintas}")
 
-    def ejecutar_modulo_funcional(self): 
-        # Permite ejecutar el módulo funcional desde la instancia de la clase, mostrando un menú con las opciones disponibles
-        pass
 
-# Módulo funcional
-def item_activos(coleccion): 
-    # Retorna lista de ítems que cumplen la condición principal del dominio usando filter() y map()
-    pass
+class EspecieEnPeligro(Coleccion):
+    """Colección especializada con foco en especies en peligro crítico."""
 
-def resumen_coleccion(coleccion): 
-    # Genera un string que resumen por ítem usando map() y una función lambda o auxiliar
-    pass
+    def __init__(self, nombre, poblacion_estimada):
+        super().__init__(nombre)
+        self.poblacion_estimada = poblacion_estimada  # int: población total estimada en la reserva
 
-def items_ordenados(coleccion): 
-    # Retorna la lista ordenada por el criterio dado usando sorted() con key=lambda
-    pass
+    def estadisticas(self):
+        """Extiende las estadísticas base con datos propios de la reserva especializada."""
+        super().estadisticas()
+        criticas = [e for e in self.especies if e.es_activa()]
+        print(f"--- Estadísticas de especialización ---")
+        print(f"Población estimada en reserva: {self.poblacion_estimada}")
+        print(f"Especies en estado crítico: {len(criticas)}")
 
-def iterar_opcion(coleccion, opcion): 
+    def plan_conservacion(self):
+        """Genera un plan de conservación para las especies en peligro crítico."""
+        criticas = [e for e in self.especies if e.es_activa()]
+        if not criticas:
+            print("No hay especies en peligro crítico registradas.")
+            return
+        print("\n--- PLAN DE CONSERVACIÓN ---")
+        for e in criticas:
+            estado = "Estudiada" if e.estudiada else "Pendiente de estudio"
+            print(f"  - {e.nombre} ({e.nombre_cientifico})")
+            print(f"    Hábitat: {e.habitat} | Estado: {estado}")
+
+
+# ==============================================================
+# MÓDULO FUNCIONAL
+# ==============================================================
+
+def items_activos(coleccion):
+    """Retorna nombres de especies 'en peligro' usando filter() y map()."""
+    en_peligro = filter(lambda e: e.es_activa(), coleccion.especies)
+    return list(map(lambda e: e.nombre, en_peligro))
+
+def resumen_coleccion(coleccion):
+    """Genera un string de resumen por especie usando map() y lambda."""
+    return list(map(lambda e: e.resumen(), coleccion.especies))
+
+def items_ordenados(coleccion, criterio):
+    """Retorna la lista de especies ordenada por el criterio dado usando sorted() con key=lambda."""
+    return sorted(coleccion.especies, key=lambda e: getattr(e, criterio))
+
+
+# ==============================================================
+# MENÚ PRINCIPAL
+# ==============================================================
+
+def _pedir_especie():
+    """Solicita datos al usuario y retorna una instancia de Especie validada."""
+    print("\n--- AGREGAR ESPECIE ---")
+    nombre = input("Nombre común: ")
+    nombre_cientifico = input("Nombre científico: ")
+    habitat = input("Hábitat: ")
+    categoria = input("Categoría (en peligro / vulnerable / extinta): ").lower().strip()
+    while categoria not in Especie.categorias_validas:
+        print(f"Categoría no válida. Opciones: {', '.join(Especie.categorias_validas)}")
+        categoria = input("Categoría: ").lower().strip()
+    return Especie(nombre, nombre_cientifico, habitat, categoria)
+
+
+def _menu_funcional(coleccion):
+    print("\n--- MÓDULO FUNCIONAL ---")
+    print("a. Mostrar especies activas (en peligro)")
+    print("b. Resumen de colección")
+    print("c. Ordenar por criterio")
+    sub = input("Seleccione: ").lower().strip()
+
+    if sub == "a":
+        activos = items_activos(coleccion)
+        if activos:
+            print("Especies en peligro (filter + map):")
+            for nombre in activos:
+                print(f"  → {nombre}")
+        else:
+            print("No hay especies en peligro registradas.")
+    elif sub == "b":
+        resumenes = resumen_coleccion(coleccion)
+        if resumenes:
+            print("Resumen de colección (map + lambda):")
+            for r in resumenes:
+                print(f"  → {r}")
+        else:
+            print("La colección está vacía.")
+    elif sub == "c":
+        print("Criterios: nombre, nombre_cientifico, habitat, categoria")
+        criterio = input("Ordenar por: ").strip()
+        if criterio not in ("nombre", "nombre_cientifico", "habitat", "categoria"):
+            print("Criterio no válido.")
+            return
+        ordenadas = items_ordenados(coleccion, criterio)
+        print(f"Especies ordenadas por '{criterio}' (sorted + lambda):")
+        for e in ordenadas:
+            print(f"  → {e.resumen()}")
+    else:
+        print("Opción no válida.")
+
+
+def iterar_opcion(coleccion, opcion):
     try:
         opcion = int(opcion)
     except ValueError:
-        print("Opción no válida. Por favor, seleccione una opción del 1 al 7.")
+        print("Opción no válida. Ingrese un número del 1 al 9.")
         return True
 
     match opcion:
         case 1:
-            # Agregar ítem
-            return coleccion.agregar_especie()
+            especie = _pedir_especie()
+            coleccion.agregar(especie)
         case 2:
-            # Mostrar ítems
-            return coleccion.mostrar_especies()
+            if not coleccion.especies:
+                print("La colección está vacía.")
+            else:
+                for e in coleccion.especies:
+                    print(e)
         case 3:
-            # Buscar por atributo principal
-            return coleccion.buscar_especie(input("Ingrese el nombre de la especie a buscar: "))
+            nombre = input("Nombre a buscar: ")
+            resultados = coleccion.buscar_por_nombre(nombre)
+            if resultados:
+                for e in resultados:
+                    print(e)
+            else:
+                print("No se encontraron especies.")
         case 4:
-            # Filtrar por categoría
-            return coleccion.filtar_por_categoria(input("Ingrese la categoría a filtrar: "))
+            categoria = input("Categoría (en peligro / vulnerable / extinta): ").lower().strip()
+            resultados = coleccion.filtrar_por_categoria(categoria)
+            if resultados:
+                for e in resultados:
+                    print(e)
+            else:
+                print("No se encontraron especies en esa categoría.")
         case 5:
-            # Marcar ítem como procesado / activo / visitado (según dominio)
-            return coleccion.marcar_estudiada(input("Ingrese el nombre de la especie a marcar como estudiada: "))
+            nombre = input("Nombre de la especie a marcar como estudiada: ")
+            encontradas = coleccion.buscar_por_nombre(nombre)
+            if encontradas:
+                encontradas[0].marcar_estudiada()
+                print(f"'{encontradas[0].nombre}' marcada como estudiada.")
+            else:
+                print("Especie no encontrada.")
         case 6:
-            # Ver estadísticas
-            return coleccion.estadisticas()
+            coleccion.estadisticas()
         case 7:
-            # Salir
+            coleccion.plan_conservacion()
+        case 8:
+            _menu_funcional(coleccion)
+        case 9:
             return False
         case _:
-            print("Opción no válida. Por favor, seleccione una opción del 1 al 7.")
-            return True
+            print("Opción no válida. Ingrese un número del 1 al 9.")
+    return True
 
-def menu_principal(): 
-    # El menú opera sobre una instancia de "EspecieEnPeligro. Al iniciarse el programa solicita al usuario el nombre y la especialización de la colección". Debe ofrecer al menos 7 opciones
-    print("Bienvenido al sistema de gestión de especies en peligro")
-    print("Por favor, ingrese el nombre de la colección especializada:")
-    # nombre_coleccion = input()
-    nombre_coleccion = "Colección de Especies en Peligro"
-    print("Por favor, ingrese la especialización de la colección:")
-    # especializacion = input()
-    especializacion = "Especies en Peligro"
-    EP = EspecieEnPeligro(nombre_coleccion, especializacion)
-    print("Colección especializada creada: " + str(EP))
-    while True: 
-        print("\nMenú de opciones:")
-        print("1. Agregar especie\n2. Mostrar especies\n3. Buscar especie\n4. Filtrar por categoría\n5. Marcar especie como estudiada\n6. Ver estadísticas\n7. Salir")
-        opcion = input("Seleccione una opción: ")   
-        resultado = iterar_opcion(EP, opcion)
-        if not resultado: 
+
+def menu_principal():
+    print("=" * 46)
+    print("  SISTEMA DE GESTIÓN — PROYECTO FINAL")
+    print("  Paradigmas de la Programación · FP-UNA")
+    print("=" * 46)
+    nombre = input("Nombre de la colección: ")
+    while True:
+        try:
+            poblacion = int(input("Población estimada de la reserva: "))
             break
+        except ValueError:
+            print("Por favor ingrese un número entero.")
+    coleccion = EspecieEnPeligro(nombre, poblacion)
+    print(f"\nColección '{nombre}' iniciada.")
+    print(f"Población estimada: {poblacion}")
+    print("=" * 46)
+    while True:
+        print("\n--- MENÚ PRINCIPAL ---")
+        print("1. Agregar especie")
+        print("2. Mostrar todas las especies")
+        print("3. Buscar por nombre")
+        print("4. Filtrar por categoría")
+        print("5. Marcar como estudiada")
+        print("6. Ver estadísticas")
+        print("7. Plan de conservación")
+        print("8. Módulo funcional")
+        print("9. Salir")
+        opcion = input("Seleccione una opción: ")
+        if not iterar_opcion(coleccion, opcion):
+            print("¡Hasta pronto!")
+            break
+
 
 menu_principal()
 
-# Reflexion Comparativa
-"""
-1. Comparen el método agregar() de la ColeccionEspecializada con agregar_libro() del TPI 
-2. ¿Qué ganaron con la encapsulación en objeto? 
-3. ¿Qué decisión de diseño fue la más difícil en su dominio? ¿Por qué la tomaron así? 
-4. ¿Qué parte del módulo funcional resultó más natural trabajar sobre objetos en lugar de 
-diccionarios? 
-"""
+
+# ==============================================================
+# REFLEXIÓN COMPARATIVA
+# ==============================================================
+#
+# 1. agregar() de EspecieEnPeligro vs. agregar_libro() del TPI 1:
+#    En TPI 1, agregar_libro() operaba sobre una lista global externa a la función.
+#    En el Proyecto Final, agregar() (línea ~55) es un método de Coleccion que
+#    opera sobre self.especies, una lista interna del objeto. La validación de tipo
+#    con isinstance() queda encapsulada dentro del método, eliminando la posibilidad
+#    de insertar datos incorrectos desde afuera. El estado ya no es global: pertenece
+#    al objeto y solo él lo gestiona.
+#
+# 2. Decisión de diseño más difícil:
+#    Separar Coleccion (genérica) de EspecieEnPeligro (especializada).
+#    La alternativa inicial era poner toda la lógica en una sola clase, que fue
+#    lo que hicimos en la primera versión del código. Elegimos herencia porque
+#    EspecieEnPeligro ES UNA Coleccion más específica: reutiliza agregar(),
+#    buscar_por_nombre() y filtrar_por_categoria() sin cambios, y solo extiende
+#    estadisticas() con super() (línea ~83) y agrega plan_conservacion() (línea ~90).
+#    Así la clase base queda genérica y reutilizable.
+#
+# 3. Módulo funcional sobre objetos vs. diccionarios:
+#    La función items_activos() (línea ~105) usa e.es_activa() para filtrar.
+#    En TPI 1 hubiéramos accedido a especie["categoria"], con riesgo de KeyError
+#    si la clave no existía. Con objetos, es_activa() encapsula la condición y
+#    el código es más expresivo y seguro. Lo mismo aplica a resumen_coleccion()
+#    (línea ~110): e.resumen() es más claro que concatenar manualmente campos
+#    de un diccionario.
